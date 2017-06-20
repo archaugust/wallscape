@@ -1,0 +1,23 @@
+.o-images {
+	clear: both;
+	display: block;
+}
+
+.o-images > div{
+	display: inline-block;
+	padding-bottom: 20px;
+	overflow: hidden;
+	width: 24%;
+} 
+
+.o-images .description {
+	height: 30px;
+}
+
+.o-images img {
+	width: 100%;
+}
+
+.u-right {
+	float: right;
+}

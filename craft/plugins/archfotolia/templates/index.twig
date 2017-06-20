@@ -1,0 +1,66 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set title = "Fotolia Images"|t %}
+
+{% set content %}
+<div class="buttons">
+    <form method="post" action="" accept-charset="UTF-8">
+        <input type="hidden" name="action" value="archFotolia/images/searchResults" />
+        <input type="hidden" name="redirect" value="archFotolia/images/searchResults" />
+		{{ getCsrfInput() }}
+		
+        {{ forms.textField({
+            label: 'Keywords'|t,
+            required: true,
+            name: 'keywords',
+            value: null,
+        }) }}
+
+        <input type="submit" class="btn submit" value="{{ 'Search'|t }}">
+    </form>
+</div>
+{% set products = craft.commerce.products.type('fotolia').find() %}
+
+<p id="noproducts"{% if products|length %} class="hidden"{% endif %}>
+    {{ "No products exist yet."|t }}
+</p>
+
+<table id="products" class="data fullwidth">
+    <thead>
+        <th>Image</th>
+        <th scope="col">Title</th>
+        <th>Fotolia ID</th>
+        <th>Category</th>
+        <th class="thin"></th>
+    </thead>
+    <tbody>
+{% set thumb = {
+    mode: 'crop',
+    width: 100,
+    height: 100,
+    quality: 100
+} %}
+    
+{% for product in products %}
+	{% set image = product.image.first() %}
+    <tr data-id="{{ product.id }}" data-name="{{ product.variants[0].sku }}">
+        <td><img src="{{ image.getUrl(thumb) }}" alt="{{ image.title }}"></td>
+        <td><a href="{{ url('commerce/products/'~ product.slug) }}">{{ product.title }}</a></td>
+        <td>{{ product.fotoliaId }}</td>
+        <td></td>
+        <td><a class="delete icon" title="{{ 'Delete'|t }}"></a></td>
+    </tr>
+{% endfor %}
+    </tbody>
+</table>
+{% endset %}
+
+{% set js %}
+    new Craft.AdminTable({
+        tableSelector: '#products',
+        noObjectsSelector: '#noproducts',
+        deleteAction: 'archfotolia/images/deleteImage'
+    });
+{% endset %}
+{% includeJs js %}

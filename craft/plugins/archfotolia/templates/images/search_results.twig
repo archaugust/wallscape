@@ -1,0 +1,53 @@
+{% extends "_layouts/cp" %}
+{% includeCssResource('archfotolia/css/custom.css') %}
+
+{% set title = "Search Results"|t %}
+
+{% set centered = true %}
+
+{% set crumbs = [
+    { label: "Fotolia Images"|t, url: url('archfotolia') }
+] %}
+
+{% set content %}
+<form method="post" action="" accept-charset="UTF-8">
+    <input type="hidden" name="action" value="archFotolia/images/addImages" />
+    
+    <div class="buttons">
+        {{ count }} results found
+    
+        <br /><br />
+        
+        <select name="category" required="required">
+        	<option value="">Select category to add images to</option>
+        {% for category in craft.categories.group('productCollections') %}
+        	<option value="{{ category.title }}">{% if category.level > 1 %}{% for i in 1..category.level %}-{% endfor %}{% endif %}{{ category.title }}</option>
+        {% endfor %}
+        </select><br />
+        <input type="submit" class="btn submit" value="Save">
+    </div>
+    
+	{{ getCsrfInput() }}
+	<div class="o-images">
+	{% for i in 0..10 %}
+	{% set item = attribute(items, i) %}
+    	<div>
+        	<label for="image_{{ item.id }}">
+            	<img src="{{ item.thumbnail_400_url }}" alt="{{ item.title }}" />
+            	<div class="description">
+	            	<input type="checkbox" id="image_{{ item.id }}" name="images[]" value="{{ item.id }}" /> <span class="title">{{ item.title }}</span>
+            	</div>
+        	</label>
+    	</div>
+	{% endfor %}
+	</div>
+</form>
+
+<script>
+var 
+	last_image = 10,
+	total = {{ count }}
+;
+
+</script>
+{% endset %}
