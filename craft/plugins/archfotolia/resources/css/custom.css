@@ -1,4 +1,5 @@
 .o-images {
+	padding-top: 20px;
 	clear: both;
 	display: block;
 }
@@ -16,6 +17,41 @@
 
 .o-images img {
 	width: 100%;
+}
+
+.o-image-container {
+	width: 150px;
+	height: 100px;
+	overflow: hidden;
+}
+
+.o-image-container img {
+	height: 100%;
+	position: relative;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.o-save-button {
+	position: fixed;
+	top: 70px;
+	right: 30px;
+}
+
+#modal.body {
+	height: 100%;
+}
+
+#modal.body img {
+	position: relative;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+#loadingDiv {
+	padding-top: 20px;
+	text-align: center;
 }
 
 .u-right {

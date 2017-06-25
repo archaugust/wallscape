@@ -28,6 +28,23 @@ class ArchFotoliaPlugin extends BasePlugin
     	return true;
     }
     
+    protected function defineSettings()
+    {
+    	return array(
+    			'apiKey' => array(AttributeType::String),
+    			'price' => array(AttributeType::String),
+    			'description' => array(AttributeType::Mixed),
+    			'productInfo' => array(AttributeType::Mixed),
+    	);
+    }
+
+    public function getSettingsHtml()
+    {
+    	return craft()->templates->render('archfotolia/settings', array(
+    			'settings' => $this->getSettings()
+    	));
+    }
+    
     public function registerCpRoutes()
     {
     	return array(

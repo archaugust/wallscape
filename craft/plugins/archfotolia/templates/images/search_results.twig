@@ -1,5 +1,7 @@
 {% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
 {% includeCssResource('archfotolia/css/custom.css') %}
+{% includeCssResource('archfotolia/css/font-awesome.min.css') %}
 
 {% set title = "Search Results"|t %}
 
@@ -10,44 +12,93 @@
 ] %}
 
 {% set content %}
+<div class="buttons">
+    <form method="post" action="" accept-charset="UTF-8">
+        <input type="hidden" name="action" value="archFotolia/images/searchResults" />
+        <input type="hidden" name="redirect" value="archFotolia/images/searchResults" />
+		{{ getCsrfInput() }}
+		
+        {{ forms.textField({
+            label: 'Keywords'|t,
+            required: true,
+            name: 'keywords',
+            value: keywords,
+        }) }}
+
+        <input type="submit" class="btn submit" value="{{ 'Search'|t }}">
+    </form>
+</div>
+<hr />
 <form method="post" action="" accept-charset="UTF-8">
     <input type="hidden" name="action" value="archFotolia/images/addImages" />
     
-    <div class="buttons">
-        {{ count }} results found
-    
-        <br /><br />
-        
+    {{ count }} results found
+
+	<div class="o-save-button">    
         <select name="category" required="required">
         	<option value="">Select category to add images to</option>
         {% for category in craft.categories.group('productCollections') %}
-        	<option value="{{ category.title }}">{% if category.level > 1 %}{% for i in 1..category.level %}-{% endfor %}{% endif %}{{ category.title }}</option>
+        	<option value="{{ category.id ~'||'~ category.title }}">{% if category.level > 1 %}{% for i in 1..category.level %}-{% endfor %}{% endif %}{{ category.title }}</option>
         {% endfor %}
-        </select><br />
+        </select> 
         <input type="submit" class="btn submit" value="Save">
     </div>
     
 	{{ getCsrfInput() }}
 	<div class="o-images">
-	{% for i in 0..10 %}
+	{% for i in 0..19 %}
+	{% if attribute(items, i) is defined %}
 	{% set item = attribute(items, i) %}
     	<div>
         	<label for="image_{{ item.id }}">
-            	<img src="{{ item.thumbnail_400_url }}" alt="{{ item.title }}" />
+            	<img src="{{ item.thumbnail_400_url }}" alt="{{ item.title|replace('"','') }}" />
             	<div class="description">
-	            	<input type="checkbox" id="image_{{ item.id }}" name="images[]" value="{{ item.id }}" /> <span class="title">{{ item.title }}</span>
+	            	<input type="checkbox" id="image_{{ item.id }}" name="images[]" value="{{ item.id ~'||'~ item.title|replace('"','') ~'||'~ item.thumbnail_400_url }}" /> <span class="title">{{ item.title }}</span>
             	</div>
         	</label>
     	</div>
+    {% endif %}
 	{% endfor %}
 	</div>
+	<div id="loadingDiv"></div>
 </form>
 
-<script>
-var 
-	last_image = 10,
-	total = {{ count }}
-;
+<input type="hidden" name="total" value="{{ count }}" />
+<input type="hidden" name="offset" value="20" />
 
-</script>
 {% endset %}
+
+{% set js %}
+$(window).scroll(function() {
+    if($(window).scrollTop() == $(document).height() - $(window).height()) {
+    	$('#loadingDiv').html('<i class="fa fa-refresh fa-4x fa-spin"></i><span class="sr-only">Loading...</span>');
+    	
+        var offset = $("input[name='offset']"),
+        	data = {
+            	keywords:'{{ keywords }}',
+            	offset:offset.val(),
+            };
+        
+        Craft.postActionRequest('archFotolia/images/searchResultsAjax', data, function(response) {
+    		if (response.success) {
+    			var items = response.items,
+    				item, title;
+    			
+        		for (var key in items) {
+        			if (key != 'nb_results') {
+        				item = items[key]; 
+        				title = (item.title).replace(/['"]+/g, '');
+        				$('.o-images').append('<div><label for="image_'+ item.id +'"><img src="'+ item.thumbnail_400_url +'" alt="'+ title +'" /><div class="description"><input type="checkbox" id="image_'+ item.id +'" name="images[]" value="'+ item.id +'||'+ title +'||'+ item.thumbnail_400_url +'" /> <span class="title">'+ item.title +'</span></div></label></div> ');
+        			}
+        		}
+        		
+                offset.val(parseInt(offset.val()) + 20);
+		    	$('#loadingDiv').html('');
+		    	console.log(offset.val());
+    		}
+        });    
+    }
+});
+
+{% endset %}
+{% includeJs js %}

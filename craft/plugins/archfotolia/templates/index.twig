@@ -1,4 +1,5 @@
 {% extends "_layouts/cp" %}
+{% includeCssResource('archfotolia/css/custom.css') %}
 {% import "_includes/forms" as forms %}
 
 {% set title = "Fotolia Images"|t %}
@@ -21,6 +22,7 @@
     </form>
 </div>
 {% set products = craft.commerce.products.type('fotolia').find() %}
+{% paginate craft.commerce.products.type('fotolia').limit(20) as products %}
 
 <p id="noproducts"{% if products|length %} class="hidden"{% endif %}>
     {{ "No products exist yet."|t }}
@@ -29,31 +31,37 @@
 <table id="products" class="data fullwidth">
     <thead>
         <th>Image</th>
-        <th scope="col">Title</th>
+        <th>Title</th>
         <th>Fotolia ID</th>
         <th>Category</th>
         <th class="thin"></th>
     </thead>
     <tbody>
-{% set thumb = {
-    mode: 'crop',
-    width: 100,
-    height: 100,
-    quality: 100
-} %}
     
 {% for product in products %}
-	{% set image = product.image.first() %}
-    <tr data-id="{{ product.id }}" data-name="{{ product.variants[0].sku }}">
-        <td><img src="{{ image.getUrl(thumb) }}" alt="{{ image.title }}"></td>
-        <td><a href="{{ url('commerce/products/'~ product.slug) }}">{{ product.title }}</a></td>
-        <td>{{ product.fotoliaId }}</td>
-        <td></td>
+    {% set category = craft.categories.id(product.collectionsCategory.id).first() %}
+    <tr data-id="{{ product.id }}" data-name="{{ product.title }}">
+        <td><div class="o-image-container"><img src="{{ product.fotoliaImageUrl }}" alt="{{ product.title }}" /></div></td>
+        <td><a class="o-fotolia-title" href="{{ url('commerce/products/fotolia/'~ product.id ~'-'~ product.slug) }}">{{ product.title }}</a></td>
+        <td><div class="o-fotolia-id">{{ product.fotoliaId }}</div></td>
+        <td>{{ product.fotoliaProductCategoryTitle }}</td>
         <td><a class="delete icon" title="{{ 'Delete'|t }}"></a></td>
     </tr>
 {% endfor %}
     </tbody>
 </table>
+<p>
+{% if paginate.prevUrl %}<a class="btn" href="{{ paginate.prevUrl }}">Previous Page</a>{% endif %} 
+{% if paginate.nextUrl %}<a class="btn" href="{{ paginate.nextUrl }}">Next Page</a>{% endif %}
+</p>
+{% endpaginate %}
+
+<div id="my-modal" class="modal">
+    <div id="modal" class="body">
+        
+    </div>
+</div>
+
 {% endset %}
 
 {% set js %}
@@ -62,5 +70,23 @@
         noObjectsSelector: '#noproducts',
         deleteAction: 'archfotolia/images/deleteImage'
     });
+    
+    $modal = new Garnish.Modal($('#my-modal'));
+    $modal.hide(); 
+    
+    $('.o-image-container').click(function(){
+    	var image = $(this).find('img');
+    	$('#modal.body').html('<img src="'+ image.prop('src') +'" />');
+	    $modal.show();
+    });
+    
+    $('.o-fotolia-id').click(function(){
+    	var id = $(this).html(),
+    		title = $(this).closest('tr').find('.o-fotolia-title').html()
+    	;
+    	console.log(id +' '+ title);
+    	
+    });
+    
 {% endset %}
 {% includeJs js %}

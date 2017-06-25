@@ -1,0 +1,29 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+    label: 'Fotolia API Key'|t,
+    required: true,
+    name: 'apiKey',
+    value: settings.apiKey,
+}) }}
+
+{{ forms.textField({
+    label: 'Price'|t,
+    required: true,
+    name: 'price',
+    value: settings.price,
+}) }}
+
+{{ forms.textField({
+    label: 'Description'|t,
+    required: true,
+    name: 'description',
+    value: settings.description,
+}) }}
+
+{{ forms.textField({
+    label: 'Product Info'|t,
+    required: true,
+    name: 'productInfo',
+    value: settings.productInfo,
+}) }}
